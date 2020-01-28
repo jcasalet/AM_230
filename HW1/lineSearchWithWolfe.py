@@ -7,7 +7,7 @@ import math
 epsilon = 1e-16
 alpha_max = 1
 alpha_min = 0
-c=1
+c=10
 c1 = 1e-4
 c2 = 0.9
 
@@ -26,7 +26,8 @@ def phi_prime(x_k, alpha):
     return grad_f(x_k + alpha * -1 * grad_f(x_k)).transpose().dot(-1 * grad_f(x_k))
 
 def zoom(x_k, alpha_lo, alpha_hi):
-    while abs(alpha_hi - alpha_lo) > epsilon:
+    #while abs(alpha_hi - alpha_lo) > epsilon:
+    while True:
         alpha_j = (alpha_lo + alpha_hi) / 2
         phi_alpha_j =  phi(x_k, alpha_j)
         # if φ(αj ) > φ(0) + c1αjφ(0) or φ(αj ) ≥ φ(αlo)
@@ -96,7 +97,7 @@ def steepestDescent(alpha_0, alpha_1, answer, xk):
 def main():
     alpha_0 = alpha_min
     alpha_1 = random.uniform(alpha_0, alpha_max)
-    answer = [2, -1]
+    answer = [2/c, -1]
     xk_0 = np.array([2, 2])
     x_k, delta = steepestDescent(alpha_0, alpha_1, answer, xk_0)
     print('x = ' + str(x_k) + ' with a delta = ' + str(delta[len(delta)-1]) )
