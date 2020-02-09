@@ -3,14 +3,14 @@ import numpy as np
 import math
 from numpy.linalg import norm
 import sys
-import ad
 
 max_iterations = 1e+2
 tolerance = 1e-8
 
+
 def main():
     if len(sys.argv) != 2:
-        print("usage: myClassifier.py [path-to-input-files]")
+        print("usage: newtonMethodClassifier.py [path-to-input-files]")
         exit(1)
 
     # data and labels are read in as numpy arrays
@@ -18,21 +18,21 @@ def main():
     labels = scipy.io.loadmat(sys.argv[1] + '/LABELS.mat')['LABELS']
 
     # run newton's method
-    theta = getThetaFromNewton(labels, data)
-
+    theta, i = getThetaFromNewton(labels, data)
     # print results
-    print('norm(grad_f = ' + str(norm(grad_f(labels, data, theta))))
+    print('using newtons method:')
     print('theta = ' + str(theta))
+    print('norm(grad_f = ' + str(norm(grad_f(labels, data, theta))))
     print('objective = ' + str(objective(labels, data, theta)))
-
     # now try a test point on the +1
     print('predict(' + str([-1, -1]) +') = ' + str(predict(np.array([-1, -1]).transpose(),theta)))
-
     # now try a test point on the -1
     print('predict(' + str([2, 1]) + ') = ' + str(predict(np.array([2, 1]).transpose(),theta)))
-
     # print accuracy
     print('accuracy = ' + str(accuracy(labels, data, theta)))
+    print('num iterations = ' + str(i))
+
+
 
 def getThetaFromNewton(L, x):
     # create theta parameter with random numbers in interval (0, 1)
@@ -41,7 +41,7 @@ def getThetaFromNewton(L, x):
     while norm(grad_f(L, x, theta)) > tolerance and i < max_iterations:
         theta = theta - np.linalg.inv(grad_grad_f(L, x, theta)).dot(grad_f(L, x, theta))
         i += 1
-    return theta
+    return theta, i
 
 # calculate accuracy for model t
 def accuracy(L, x, t):
@@ -51,7 +51,6 @@ def accuracy(L, x, t):
         if y_hat == np.ndarray.item(L[i]):
             numCorrect +=1
     return (1.0 * numCorrect) / (1.0 * len(x))
-
 
 # predict label for single  point
 def predict(x, t):
@@ -93,7 +92,6 @@ def grad_grad_f(L, x, t):
         f11 += ((x[i][1] **2) * commonNumeratorPart) / denom
     hessian = np.array([[np.ndarray.item(f00), np.ndarray.item(f01)],
                      [np.ndarray.item(f10), np.ndarray.item(f11)]])
-
     return np.array([[1, 0], [0, 1]]) - hessian
 
 # define objective function
@@ -103,6 +101,7 @@ def objective(L, x, t):
         p = p_of_L_given_x(L[i], x[i], t)
         sumOfLogs += math.log(p)
     return 1/2 * norm(t) **2 - sumOfLogs
+
 
 if __name__ == "__main__":
 
