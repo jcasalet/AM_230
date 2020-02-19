@@ -50,16 +50,15 @@ def phi_prime(xk, alpha):
 
 
 def main():
-    n = 10
+    n = 100
     x_k = np.random.rand(n)
-    alpha = random.uniform(alpha_min, alpha_max)
     p_k = -grad_f(x_k)
     deltas = list()
     k=1
 
     while norm(grad_f(x_k)) > epsilon:
 
-        alpha, fc, gc, new_fval, old_fval, new_slope = scipy.optimize.line_search(f=f, myfprime=grad_f, xk=x_k, pk=p_k, gfk = grad_f(x_k), amax=1, maxiter=10, c1=c1, c2=c2)
+        alpha, fc, gc, new_fval, old_fval, new_slope = scipy.optimize.line_search(f=f, myfprime=grad_f, xk=x_k, pk=p_k, gfk = grad_f(x_k), amax=1, maxiter=5, c1=c1, c2=c2)
         x_kplus1 = x_k + alpha * p_k
 
         gradf_k = grad_f(x_k)

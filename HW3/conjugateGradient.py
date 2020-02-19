@@ -3,6 +3,7 @@ from numpy.linalg import qr
 import random
 import matplotlib.pyplot as plt
 from numpy.linalg import norm
+from numpy.linalg import inv
 import math
 import sys
 
@@ -21,38 +22,64 @@ def generateMatrix(n, dist):
     Y = np.random.rand(n, n)
     Q, R = qr(Y)
     D = np.zeros((n, n))
+    lambda_max = -sys.maxsize
+    lambda_min = sys.maxsize
     if dist is 'uniform':
         for i in range(len(D)):
-            D[i][i] = random.randint(10, 10**3)
+            lambda_i = random.randint(10, 10**3)
+            D[i][i] = lambda_i
+            if lambda_i < lambda_min:
+                lambda_min = lambda_i
+            if lambda_i > lambda_max:
+                lambda_max = lambda_i
     elif dist is 'four':
         for i in range(len(D)):
             # pick a dist
             newRand = np.random.random()
             if newRand < 0.25:
                 # pick value from  (9, 11)
-                D[i][i] = np.random.randint(9, 11)
+                lambda_i = np.random.randint(9, 11)
+                D[i][i] = lambda_i
+
             elif newRand < 0.5:
                 # pick value from  (99, 101)
-                D[i][i] = np.random.randint(99, 101)
+                lambda_i = np.random.randint(99, 101)
+                D[i][i] = lambda_i
+
             elif newRand < 0.75:
                 # pick value from  (999, 1001)
-                D[i][i] = np.random.randint(999, 1001)
+                lambda_i = np.random.randint(999, 1001)
+                D[i][i] = lambda_i
+
             else:
                 # pick value from (9999, 10001)
-                D[i][i] = np.random.randint(9999, 10001)
+                lambda_i = np.random.randint(9999, 10001)
+                D[i][i] = lambda_i
+
+            if lambda_i < lambda_min:
+                lambda_min = lambda_i
+            if lambda_i > lambda_max:
+                lambda_max = lambda_i
+
     elif dist is 'two':
         for i in range(len(D)):
             newRand = np.random.random()
             if newRand < 0.5:
-                D[i][i] = np.random.randint(9, 11)
+                lambda_i = np.random.randint(9, 11)
+                D[i][i] = lambda_i
             else:
-                D[i][i] = np.random.randint(999, 1001)
+                lambda_i = np.random.randint(999, 1001)
+                D[i][i] = lambda_i
+            if lambda_i < lambda_min:
+                lambda_min = lambda_i
+            if lambda_i > lambda_max:
+                lambda_max = lambda_i
 
     else:
         print('dist: ' + str(dist) + ' is unknown.  use uniform, two, or four')
         sys.exit(1)
 
-    return Q.transpose().dot(D).dot(Q)
+    return Q.transpose().dot(D).dot(Q), lambda_min, lambda_max
 
 def f(x, A, b):
     return 0.5 * x.transpose().dot(A).dot(x) - b.transpose().dot(x)
@@ -62,7 +89,7 @@ def grad_f(x, A, b):
 
 def runConjugateGradient(n, eigenDist):
     b = np.zeros(n)
-    A = generateMatrix(n, eigenDist)
+    A, lambda_min, lambda_max = generateMatrix(n, eigenDist)
     x_k = np.array([random.random() for i in range(0, n)])
     x0 = x_k
     r_k = grad_f(x_k, A, b)
@@ -81,13 +108,26 @@ def runConjugateGradient(n, eigenDist):
         k = k+1
         x_k = x_kplus1
         r_k = r_kplus1
-    return A, x0, x_k, normErrors
+    return A, x0, x_k, normErrors, k, lambda_min, lambda_max
 
 
 def main():
-    A, x0, xstar, normErrors = runConjugateGradient(10**3, 'four')
-    print('x* = : ' + str(xstar))
-    plotGradient(normErrors, "norm(Ax - b)")
+    eigenDist = 'four'
+    solution = np.zeros(10**3)
+    A, x0, xstar, normErrors, iterations, lambda_min, lambda_max = runConjugateGradient(10**3, eigenDist)
+
+    # now calculate theoretical convergence rate
+    conditionNumber = lambda_max / lambda_min
+    print('k(A) = ' + str(conditionNumber))
+
+    # show 5.36 holds for convergence
+    LHS = norm(xstar - solution)
+    RHS = 2 * ( (math.sqrt(conditionNumber) - 1) / (math.sqrt(conditionNumber) + 1) ) ** iterations * norm(x0 - solution)
+    print(str(LHS) + ' <= ' + str(RHS))
+    if LHS <= RHS:
+        print('formula 5.36 holds!')
+    else:
+        print('formula 5.36 failed!')
 
 
 if __name__ == "__main__":
