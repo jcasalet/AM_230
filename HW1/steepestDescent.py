@@ -17,7 +17,6 @@ c2 = 0.9
 '''
 def f(x_k):
     return (c * x_k[0] - 2.0 ) ** 4 + x_k[1] * (c * x_k[0] - 2.0) ** 2 + (x_k[1] + 1.0) ** 2
-
 def grad_f(x_k):
     partial_f_partial_x1 = 4.0 * c * (c * x_k[0] - 2.0) ** 3 + 2.0 * c * x_k[1] ** 2 * (c * x_k[0] - 2.0)
     partial_f_partial_x2 = 2.0 * x_k[1] * (c * x_k[0] - 2) ** 2 + 2.0 * (x_k[1] + 1)
@@ -41,13 +40,11 @@ def grad_grad_f(x_k):
 
 '''def f(x_k):
     return 1/4 * x_k[0]**4 + 1/2 * (x_k[1] - x_k[2])**2 + 1/2 * x_k[1]**2
-
 def grad_f(x_k):
     partial_f_partial_x1 = x_k[0]**3
     partial_f_partial_x2 = 2 * x_k[1] - x_k[2]
     partial_f_partial_x3 = x_k[2] - x_k[1]
     return np.array([partial_f_partial_x1, partial_f_partial_x2, partial_f_partial_x3])
-
 def grad_grad_f(x_k):
     partial_x11 = 3 * x_k[0] **2
     partial_x12 = 0
@@ -87,9 +84,9 @@ def zoom(x_k, alpha_lo, alpha_hi):
 
 def lineSearch(x_k, alpha_i, alpha_i_minus_1):
 
-    phi_alpha_i = phi(x_k, alpha_i)
     i = 1
-    while abs(alpha_i - alpha_i_minus_1) > epsilon:
+    while abs(alpha_i - alpha_i_minus_1) > epsilon and i < max_iterations:
+        phi_alpha_i = phi(x_k, alpha_i)
         # if φ(αi ) > φ(0) + c1αiφ(0) or [φ(αi ) ≥ φ(αi−1) and i > 1]
         if phi_alpha_i > phi(x_k, 0) + c1 * alpha_i * phi_prime(x_k, 0) or \
             (phi_alpha_i >= phi(x_k, alpha_i_minus_1) and i>1):
@@ -143,11 +140,11 @@ def main():
     alpha_1 = random.uniform(alpha_0, alpha_max)
     #answer = [2/c, -1]
     #answer=[1,1]
-    answer = fmin(f, np.array([1.2, 1.2]))
+    answer = fmin(f, np.array([2, 2]))
     #answer = fmin(f, np.array([2, 2, 2]))
     print('answer = ' + str(answer))
     #xk_0 = np.array([2, 2, 2])
-    xk_0 = np.array([1.2,1.2])
+    xk_0 = np.array([2,2])
     x_k, delta = steepestDescent(alpha_0, alpha_1, answer, xk_0)
     print('x = ' + str(x_k) + ' with a delta = ' + str(delta[len(delta)-1]) )
     print('num iterations = ' + str(len(delta)))
@@ -155,5 +152,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
