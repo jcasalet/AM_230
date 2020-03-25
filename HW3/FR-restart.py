@@ -15,12 +15,13 @@ alpha_min = 0
 c1 = 0.1
 c2 = 0.4
 
-def plotError(deltas):
+def plotError(deltas, graphTitle):
     ax = plt.axes()
     ax.set_ylabel("log(norm(error))")
     ax.set_xlabel("iteration")
-    x_points = [i for i in range(len(deltas))]
+    x_points = [i+1 for i in range(len(deltas))]
     ax.scatter(x_points, deltas)
+    plt.title(graphTitle)
     plt.show()
 
 def f(x):
@@ -78,7 +79,7 @@ def main():
 
 
     print('x* = ' + str(x_k))
-    plotError(deltas)
+    plotError(deltas, 'fr-restart')
 
 
 if __name__ == "__main__":

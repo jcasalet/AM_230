@@ -10,12 +10,13 @@ import sys
 max_iterations = 1e+3
 threshold = 1e-8
 
-def plotGradient(grad, ylabel):
+def plotGradient(grad, ylabel, graphTitle):
     ax = plt.axes()
     ax.set_ylabel(ylabel)
     ax.set_xlabel("iteration")
     x_points = [i+1 for i in range(len(grad))]
     ax.scatter(x_points, grad)
+    plt.title(graphTitle)
     plt.show()
 
 def generateMatrix(n, dist):
@@ -97,7 +98,7 @@ def runConjugateGradient(n, eigenDist):
     k = 0
     normErrors = list()
 
-    while norm(A.dot(x_k) - b) > threshold:
+    while norm(A.dot(x_k) - b.transpose().dot(x_k)) > threshold:
         normErrors.append(math.log(norm(A.dot(x_k) - b)))
 
         alpha_k = r_k.transpose().dot(r_k) / p_k.transpose().dot(A).dot(p_k)
@@ -112,7 +113,7 @@ def runConjugateGradient(n, eigenDist):
 
 
 def main():
-    eigenDist = 'four'
+    eigenDist = 'two'
     solution = np.zeros(10**3)
     A, x0, xstar, normErrors, iterations, lambda_min, lambda_max = runConjugateGradient(10**3, eigenDist)
 
@@ -128,6 +129,8 @@ def main():
         print('formula 5.36 holds!')
     else:
         print('formula 5.36 failed!')
+
+    plotGradient(normErrors, "log(norm(error))", eigenDist)
 
 
 if __name__ == "__main__":
